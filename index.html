@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>ALLL conferences of the woooorld !!</title>
+    <link rel="stylesheet" href="styles.css" />
+    <!-- Link to your CSS -->
+  </head>
+
+  <body>
+    <header>
+      <h1>ALLL conferences of the woooorld !!</h1>
+      <div class="search-wrapper">
+        <input type="search" id="search" data-search placeholder="search" />
+      </div>
+
+      <div id="preview-search" data-search>
+        <p></p>
+      </div>
+    </header>
+    <nav></nav>
+    <main>
+      <div class="event-cards" data-event-cards-container></div>
+      <template data-event-template>
+        <div class="card">
+          <div class="header" data-header>
+            <a href="" target="_blank" data-link>
+              <h2 data-title></h2>
+              <div class="cover" data-cover>
+                <div class="image"></div>
+                <div class="overlay"></div>
+              </div>
+            </a>
+          </div>
+          <div class="body" data-body>
+            <p class="summary" data-summary></p>
+            <p class="date" data-date></p>
+            <p class="categories" data-categories></p>
+            <div class="provider" data-provider>
+              <p></p>
+            </div>
+          </div>
+        </div>
+      </template>
+    </main>
+    <footer>
+      <p>&copy; 2024 _ ALLL conferences of the woooorld !!</p>
+    </footer>
+    <script src="script.js" type="module"></script>
+    <!-- Link to your JavaScript -->
+  </body>
+</html>

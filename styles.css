@@ -1,0 +1,156 @@
+@font-face {
+  font-family: IBM;
+  src: url(./assets/fonts/IBM_Plex_Mono/IBMPlexMono-Regular.ttf);
+}
+
+body {
+  padding: 0;
+  margin-top: 0;
+  background-color: black;
+  font-family: IBM;
+  font-size: 16px;
+}
+
+a {
+  text-decoration: initial;
+}
+
+a,
+h1,
+h2,
+p {
+  color: white;
+}
+
+h1 {
+  text-transform: uppercase;
+  font-size: 2rem;
+}
+
+h2 {
+  text-transform: uppercase;
+  font-size: 1.5rem;
+}
+
+h3 {
+  text-transform: lowercase;
+}
+
+input {
+  font-family: IBM;
+}
+
+/* LAYOUT */
+main {
+  padding-top: 200px;
+}
+
+.event-cards {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* CARD */
+
+.highlight-word {
+  color: black;
+  background-color: rgba(255, 255, 255, 0.59);
+}
+.card {
+  border-bottom: solid 1px black;
+  padding-bottom: 30px;
+  margin-bottom: 30px;
+  background-color: black;
+}
+
+.card .body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.summary {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 10;
+  overflow: hidden;
+}
+
+.provider {
+  border-top: solid 1px white;
+  padding: 2px;
+  display: flex;
+  margin-top: 2rem;
+}
+
+.provider p {
+}
+
+.categories {
+  font-weight: bold;
+}
+
+.cover {
+  height: 200px;
+  width: 100%;
+  background-size: cover;
+  background-position-y: -10px;
+  position: relative;
+}
+
+.cover .image {
+  height: 100%;
+  width: 100%;
+  background-size: cover;
+  background-position-y: -10px;
+  position: absolute;
+  z-index: 2;
+
+  mix-blend-mode: luminosity;
+  filter: contrast(2.5);
+}
+
+.cover .overlay {
+  z-index: 0;
+  position: absolute;
+  /* background-color: #0e0303; */
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 30%,
+    rgba(255, 255, 255, 1) 100%
+  );
+
+  opacity: 1;
+  height: 100%;
+  width: 100%;
+  transition: 0.5s;
+}
+
+.hightlight {
+  transition: 0.5s;
+}
+.card:hover .cover .image,
+.hightlight .cover .image {
+  filter: contrast(1);
+  transition: 0.5s;
+  mix-blend-mode: initial;
+}
+.card:hover .cover .overlay,
+.hightlight .cover .overlay {
+  background: white;
+  opacity: 0;
+  transition: 0.5s;
+}
+
+header {
+  position: fixed;
+  background-color: black;
+  width: 100%;
+  padding-bottom: 15px;
+  z-index: 100;
+}
+.hide {
+  display: none;
+}

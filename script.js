@@ -97,15 +97,26 @@ for (const key in categories) {
   }
 }
 
+function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 const highlightedText = (value, paragraph) => {
   let text = paragraph.textContent.toLowerCase();
 
   if (value.length > 0) {
-    let regex = new RegExp(value, "g");
+
+    // Escape any special characters in the `value` string for regex.
+    let escapedValue = escapeRegex(value)
+
+    // Define regex to exclude special characters like @, #, $, etc.
+    let regex = new RegExp(`(?![@#$%^&*])${escapedValue}`, "gi");
+
     let newText = text.replace(
       regex,
       `<span class="highlight-word">${value}</span>`
     );
+
 
     if (text !== newText) {
       paragraph.innerHTML = newText;
@@ -117,11 +128,21 @@ const highlightedText = (value, paragraph) => {
   }
 };
 
+
+function removeAccents(str) {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
 searchInput.addEventListener("input", (e) => {
-  const value = e.target.value.toLowerCase();
+  let value = e.target.value.toLowerCase();
+
+  const escapedValue = escapeRegex(value);
+  const regex = new RegExp(`\\b${escapedValue}`, 'i');
 
   keys.forEach((key) => {
-    if (key.toLowerCase().includes(value)) {
+
+
+    if (regex.test(key)) {
       categoriesPreview.add(key);
     } else {
       categoriesPreview.remove(key);
@@ -134,15 +155,16 @@ searchInput.addEventListener("input", (e) => {
     const provider = event.element.querySelector("[data-provider] p");
     const categories = event.element.querySelector("[data-categories]");
 
+
     highlightedText(value, title)
-    highlightedText(value, paragraph)
+    // highlightedText(value, paragraph)
     highlightedText(value, provider)
     highlightedText(value, categories)
 
     if (
-      event.title.toLowerCase().includes(value) ||
-      event.category.toLowerCase().includes(value) ||
-      event.provider.toLowerCase().includes(value)
+      regex.test(event.title) ||
+      regex.test(event.category) ||
+      regex.test(event.provider)
     ) {
       event.element.classList.remove("hide");
       event.element.classList.add("hightlight");

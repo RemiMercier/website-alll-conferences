@@ -154,3 +154,11 @@ header {
 .hide {
   display: none;
 }
+
+@media only screen and (max-width: 960px) {
+  .event-cards {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(1, 1fr);
+  }
+}

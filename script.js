@@ -1,7 +1,8 @@
-import data from "../response/ollamaResponse.json" with { type: "json" };
-import categoriesMin from "../categories/categories-min.json" with { type: "json" };
+import data from "./data/posts.json" with { type: "json" };
+import categories from "./data/categories.json" with { type: "json" };
 
 const data_event = [...data];
+const searchInput = document.querySelector("[data-search]");
 
 data.forEach((e, i) => {
   const date = data_event[i].interprete_date;
@@ -10,22 +11,22 @@ data.forEach((e, i) => {
 
 data_event.sort((a, b) => a.interprete_date - b.interprete_date);
 
-// console.log(data_event)
-const searchInput = document.querySelector("[data-search]");
+
+// Categories initialization
 
 const keys = [];
-for (const key in categoriesMin) {
-  if (Object.prototype.hasOwnProperty.call(categoriesMin, key)) {
-    keys.push(key);
-  }
-}
+
+categories.forEach(element => {
+  keys.push(element.key);
+});
+
 
 const categoriesPreview = {
   items: {},
   displayMax: 15,
-  init(key) {
+  init(keys) {
     keys.forEach((el) => {
-      this.add(el);
+      this.add(el.key);
     });
   },
   update() {
@@ -46,7 +47,7 @@ const categoriesPreview = {
   },
 };
 
-categoriesPreview.init(keys);
+categoriesPreview.init(categories);
 
 let events = [];
 
@@ -57,7 +58,6 @@ const eventCardContainer = document.querySelector(
 
 events = data_event.map((event) => {
   const card = eventCardTemplate.content.cloneNode(true).children[0];
-  const header = card.querySelector("[data-header]");
   const summary = card.querySelector("[data-summary]");
   const cover = card.querySelector("[data-cover] .image");
   const title = card.querySelector("[data-title]");
@@ -90,8 +90,9 @@ events = data_event.map((event) => {
 });
 
 const keyCategories = [];
-for (const key in categoriesMin) {
-  if (Object.prototype.hasOwnProperty.call(categoriesMin, key)) {
+
+for (const key in categories) {
+  if (Object.prototype.hasOwnProperty.call(categories, key)) {
     keyCategories.push(key);
   }
 }
@@ -128,7 +129,6 @@ searchInput.addEventListener("input", (e) => {
   });
 
   events.forEach((event) => {
-
     const title = event.element.querySelector("[data-title]");
     const paragraph = event.element.querySelector("[data-summary]");
     const provider = event.element.querySelector("[data-provider] p");

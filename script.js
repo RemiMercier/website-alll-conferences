@@ -3,6 +3,10 @@ import categories from "./data/categories.json" with { type: "json" };
 
 const data_event = [...data];
 const searchInput = document.querySelector("[data-search]");
+const button = document.querySelector("#btn-lucky-post");
+const button1 = document.querySelector("#btn-lucky-category");
+const body = document.querySelector('body')
+
 
 data.forEach((e, i) => {
   const date = data_event[i].interprete_date;
@@ -11,43 +15,67 @@ data.forEach((e, i) => {
 
 data_event.sort((a, b) => a.interprete_date - b.interprete_date);
 
+const categories_list = [];
+const categories_obj = {};
 
-// Categories initialization
 
-const keys = [];
-
+console.log(categories)
 categories.forEach(element => {
-  keys.push(element.key);
+  categories_list.push(element.key);
+  categories_obj[element.key] = element
 });
 
 
 const categoriesPreview = {
-  items: {},
+  items: [],
+  items_obj: [],
+  categories_list,
   displayMax: 15,
-  init(keys) {
-    keys.forEach((el) => {
-      this.add(el.key);
+  init() {
+    this.items = [...this.categories_list]
+    this.items.forEach(key => {
+      this.items_obj.push(`${categories_obj[key].key} (${categories_obj[key].length})`)
     });
+    this.update()
   },
   update() {
     const previewSearch = document.querySelector("[data-search] p");
-    previewSearch.textContent = Object.keys(this.items)
+
+    const html = []
+
+    previewSearch.textContent = this.items_obj
       .slice(0, this.displayMax)
       .join(" - ");
   },
   add(key) {
-    this.items[key] = key;
-    this.update();
+    // console.log(key)
+    if (!this.items.includes(key)) {
+
+      this.items.push(key)
+      this.items_obj.push(`${categories_obj[key].key} (${categories_obj[key].length})`)
+
+      this.update();
+    }
+
   },
   remove(key) {
-    if (this.items[key] !== undefined) {
-      delete this.items[key];
+    if (this.items.includes(key)) {
+      const index = this.items.indexOf(key)
+
+      this.items.splice(index, 1)
+      this.items_obj.splice(index, 1)
+
       this.update();
     }
   },
+  reset() {
+    this.items = []
+    this.items_obj = []
+    categoriesPreview.init(categories_list);
+  }
 };
 
-categoriesPreview.init(categories);
+categoriesPreview.init();
 
 let events = [];
 
@@ -101,30 +129,39 @@ function escapeRegex(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+const diacriticsMap = {
+  a: "[aáàâäãå]",
+  e: "[eéèêë]",
+  i: "[iíìîï]",
+  o: "[oóòôöõ]",
+  u: "[uúùûü]",
+  c: "[cç]",
+  n: "[nñ]"
+};
+
+// Function to replace base characters with regex patterns
+function accentInsensitiveRegex(value) {
+  return value
+    .split("")
+    .map(char => diacriticsMap[char] || char)
+    .join("");
+}
+
+
+
 const highlightedText = (value, paragraph) => {
-  let text = paragraph.textContent.toLowerCase();
-
   if (value.length > 0) {
+    // Generate regex pattern for accent-insensitive matching
+    let regexPattern = accentInsensitiveRegex(value);
+    let regex = new RegExp(`(${regexPattern})`, "gi");
 
-    // Escape any special characters in the `value` string for regex.
-    let escapedValue = escapeRegex(value)
+    // Highlight matching text
+    let text = paragraph.textContent;
+    let newText = text.replace(regex, `<span class="highlight-word">$1</span>`);
 
-    // Define regex to exclude special characters like @, #, $, etc.
-    let regex = new RegExp(`(?![@#$%^&*])${escapedValue}`, "gi");
-
-    let newText = text.replace(
-      regex,
-      `<span class="highlight-word">${value}</span>`
-    );
-
-
-    if (text !== newText) {
-      paragraph.innerHTML = newText;
-    } else {
-      paragraph.innerHTML = text;
-    }
+    paragraph.innerHTML = newText;
   } else {
-    paragraph.innerHTML = text;
+    paragraph.innerHTML = paragraph.textContent;
   }
 };
 
@@ -134,20 +171,41 @@ function removeAccents(str) {
 }
 
 searchInput.addEventListener("input", (e) => {
-  let value = e.target.value.toLowerCase();
-
-  const escapedValue = escapeRegex(value);
-  const regex = new RegExp(`\\b${escapedValue}`, 'i');
-
-  keys.forEach((key) => {
+  handleSearch(e.target.value)
+});
 
 
-    if (regex.test(key)) {
-      categoriesPreview.add(key);
+const handleScrollTop = () => {
+  if (window.scrollY
+    > window.innerHeight / 5) {
+    window.scroll({
+      top: 0,
+      left: 0,
+      behavior: "smooth",
+    });
+  }
+}
+
+const handleSearch = (e) => {
+
+  handleScrollTop()
+
+  let value = e.toLowerCase();
+
+  const escapedValue = accentInsensitiveRegex(value);
+  const regex = new RegExp(`${escapedValue}`, 'i');
+
+  categories_list.forEach((item) => {
+    if (regex.test(item)) {
+      categoriesPreview.add(item);
     } else {
-      categoriesPreview.remove(key);
+      categoriesPreview.remove(item);
     }
   });
+
+  if (value === "") {
+    categoriesPreview.reset()
+  }
 
   events.forEach((event) => {
     const title = event.element.querySelector("[data-title]");
@@ -163,8 +221,8 @@ searchInput.addEventListener("input", (e) => {
 
     if (
       regex.test(event.title) ||
-      regex.test(event.category) ||
-      regex.test(event.provider)
+      regex.test(event.category)
+      ||regex.test(event.provider)
     ) {
       event.element.classList.remove("hide");
       event.element.classList.add("hightlight");
@@ -177,4 +235,49 @@ searchInput.addEventListener("input", (e) => {
       event.element.classList.remove("hightlight");
     }
   });
-});
+}
+
+
+
+const luckyGenerator = {
+  postId: "",
+  previousId: [],
+  list: [],
+  randomId: 0,
+  go({ list, key }) {
+
+    if (list.length) {
+      this.list = list;
+    }
+
+    const randomId = this.getRandomId(this.list.length)
+    console.log(randomId, this.list.length)
+    console.log(this.list[randomId])
+    const title = this.list[randomId][key]
+    if (!this.previousId.includes(title)) {
+      this.postId = title
+      this.previousId.push(this.postId)
+      searchInput.value = this.postId
+      handleSearch(this.postId)
+
+    }
+    else {
+      if (this.previousId.length === this.list.length) {
+        this.previousId = []
+      }
+      this.go({ list, key })
+
+      console.log("retry!", this.previousId.length)
+    }
+  },
+  getRandomId(max) {
+    this.randomId = Math.floor(Math.random() * max);
+    return this.randomId
+  }
+
+}
+
+
+button.addEventListener("click", () => luckyGenerator.go({ list: data, key: "title" }))
+
+button1.addEventListener("click", () => luckyGenerator.go({ list: categories, key: "key" }))

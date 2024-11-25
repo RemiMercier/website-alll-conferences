@@ -17,13 +17,18 @@
 
   <header>
     <div class="search-wrapper">
-      <input type="search" id="search" data-search placeholder="search" />
+      <div>
+        <input type="search" id="search" data-search placeholder="Chercher ?" autocomplete="off" />
+        <div id="search-result" class="search-result"></div>
+      </div>
+      <div class="w-button">
+        <button id="btn-lucky-post">Lucky post</button>
+        <button id="btn-lucky-category">Lucky category</button>
+      </div>
+
     </div>
 
-    <button id="btn-lucky-post">Lucky post</button>
-    <button id="btn-lucky-category">Lucky category</button>
-
-    <div id="preview-search" data-search>
+    <div id="preview-search">
       <p></p>
     </div>
   </header>
@@ -31,12 +36,14 @@
   <main>
     <div class="event-cards" data-event-cards-container></div>
     <template data-event-template>
-      <div class="card">
+      <div class="card not-in-view">
         <div class="header" data-header>
           <a href="" target="_blank" data-link>
             <h2 data-title></h2>
             <div class="cover" data-cover>
-              <div class="image"></div>
+              <div class="image">
+                <img loading="lazy" src="">
+              </div>
               <div class="overlay"></div>
             </div>
           </a>

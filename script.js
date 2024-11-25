@@ -5,6 +5,7 @@ const data_event = [...data];
 const searchInput = document.querySelector("[data-search]");
 const button = document.querySelector("#btn-lucky-post");
 const button1 = document.querySelector("#btn-lucky-category");
+const searchResult = document.querySelector("#search-result")
 const body = document.querySelector('body')
 
 
@@ -19,7 +20,6 @@ const categories_list = [];
 const categories_obj = {};
 
 
-console.log(categories)
 categories.forEach(element => {
   categories_list.push(element.key);
   categories_obj[element.key] = element
@@ -39,16 +39,31 @@ const categoriesPreview = {
     this.update()
   },
   update() {
-    const previewSearch = document.querySelector("[data-search] p");
+    const previewSearch = document.querySelector("#preview-search");
+    previewSearch.innerHTML = ""
 
-    const html = []
+    for (const key in this.items_obj) {
+      if (key > 12) {
+        break
+      }
 
-    previewSearch.textContent = this.items_obj
-      .slice(0, this.displayMax)
-      .join(" - ");
+
+      const category = this.items_obj[key]
+
+      const span = document.createElement("span");
+      span.innerText = category
+
+      span.addEventListener("click", (event) => {
+        event.preventDefault()
+        handleSearch(this.items[key], false)
+      })
+      previewSearch.appendChild(span);
+    }
+
+    // this.items_obj.forEach((element, index) => {
+    // });
   },
   add(key) {
-    // console.log(key)
     if (!this.items.includes(key)) {
 
       this.items.push(key)
@@ -87,7 +102,7 @@ const eventCardContainer = document.querySelector(
 events = data_event.map((event) => {
   const card = eventCardTemplate.content.cloneNode(true).children[0];
   const summary = card.querySelector("[data-summary]");
-  const cover = card.querySelector("[data-cover] .image");
+  const cover = card.querySelector("[data-cover] img");
   const title = card.querySelector("[data-title]");
   const link = card.querySelector("[data-link]");
   const provider = card.querySelector("[data-provider] p");
@@ -103,7 +118,8 @@ events = data_event.map((event) => {
   date.textContent = event.date;
 
   const screenFileName = event.screenFileName.replace(/\.jpg$/, ".webp");
-  cover.style.backgroundImage = `url('./assets/img/screenshot/${screenFileName}')`;
+  // cover.style.backgroundImage = `url('./assets/img/screenshot/${screenFileName}')`;
+  cover.setAttribute('src', `./assets/img/screenshot/${screenFileName}`)
 
   eventCardContainer.append(card);
   return {
@@ -125,75 +141,59 @@ for (const key in categories) {
   }
 }
 
-function escapeRegex(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const getNbrOfSearchingResult = (select) => {
+  searchResult.innerText = `${select} / ${data_event.length}`
 }
 
+getNbrOfSearchingResult(data_event.length)
+
+
 const diacriticsMap = {
-  a: "[aáàâäãå]",
-  e: "[eéèêë]",
-  i: "[iíìîï]",
-  o: "[oóòôöõ]",
-  u: "[uúùûü]",
-  c: "[cç]",
-  n: "[nñ]"
+  a: "[aáàâäãåÁÀÂÄÃÅ]",
+  e: "[eéèêëÉÈÊË]",
+  i: "[iíìîïÍÌÎÏ]",
+  o: "[oóòôöõÓÒÔÖÕ]",
+  u: "[uúùûüÚÙÛÜ]",
+  c: "[cçÇ]",
+  n: "[nñÑ]",
 };
 
-// Function to replace base characters with regex patterns
+function escapeRegexCharacters(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function accentInsensitiveRegex(value) {
-  return value
+  const escapedValue = escapeRegexCharacters(value);
+  return escapedValue
     .split("")
-    .map(char => diacriticsMap[char] || char)
+    .map(char => diacriticsMap[char.toLowerCase()] || char)
     .join("");
 }
 
-
-
 const highlightedText = (value, paragraph) => {
   if (value.length > 0) {
-    // Generate regex pattern for accent-insensitive matching
     let regexPattern = accentInsensitiveRegex(value);
     let regex = new RegExp(`(${regexPattern})`, "gi");
 
-    // Highlight matching text
-    let text = paragraph.textContent;
+    let text = paragraph.textContent || paragraph.innerText;
     let newText = text.replace(regex, `<span class="highlight-word">$1</span>`);
 
     paragraph.innerHTML = newText;
   } else {
-    paragraph.innerHTML = paragraph.textContent;
+    paragraph.innerHTML = paragraph.textContent || paragraph.innerText;
   }
 };
 
-
-function removeAccents(str) {
-  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-}
-
 searchInput.addEventListener("input", (e) => {
-  handleSearch(e.target.value)
+  handleSearch(e.target.value);
 });
 
-
-const handleScrollTop = () => {
-  if (window.scrollY
-    > window.innerHeight / 5) {
-    window.scroll({
-      top: 0,
-      left: 0,
-      behavior: "smooth",
-    });
-  }
-}
-
-const handleSearch = (e) => {
-
-  handleScrollTop()
-
+const handleSearch = (e, highlight = true) => {
+  searchInput.value = e
   let value = e.toLowerCase();
-
   const escapedValue = accentInsensitiveRegex(value);
-  const regex = new RegExp(`${escapedValue}`, 'i');
+  const regex = new RegExp(`${escapedValue}`, "i");
+  let selectedPost = 0
 
   categories_list.forEach((item) => {
     if (regex.test(item)) {
@@ -207,35 +207,40 @@ const handleSearch = (e) => {
     categoriesPreview.reset()
   }
 
+
   events.forEach((event) => {
     const title = event.element.querySelector("[data-title]");
     const paragraph = event.element.querySelector("[data-summary]");
     const provider = event.element.querySelector("[data-provider] p");
     const categories = event.element.querySelector("[data-categories]");
 
+    if (highlight) {
+      highlightedText(value, title)
+      highlightedText(value, provider)
+      highlightedText(value, categories)
+    }
 
-    highlightedText(value, title)
-    // highlightedText(value, paragraph)
-    highlightedText(value, provider)
-    highlightedText(value, categories)
 
     if (
       regex.test(event.title) ||
-      regex.test(event.category)
-      ||regex.test(event.provider)
+      regex.test(event.category) ||
+      regex.test(event.provider)
     ) {
+      selectedPost++
+      getNbrOfSearchingResult(selectedPost)
+
       event.element.classList.remove("hide");
-      event.element.classList.add("hightlight");
+      event.element.classList.add("highlight");
     } else {
       event.element.classList.add("hide");
-      event.element.classList.remove("hightlight");
+      event.element.classList.remove("highlight");
     }
 
     if (value === "") {
-      event.element.classList.remove("hightlight");
+      event.element.classList.remove("highlight");
     }
   });
-}
+};
 
 
 
@@ -246,19 +251,19 @@ const luckyGenerator = {
   randomId: 0,
   go({ list, key }) {
 
+    handleScrollTop()
+
     if (list.length) {
       this.list = list;
     }
 
     const randomId = this.getRandomId(this.list.length)
-    console.log(randomId, this.list.length)
-    console.log(this.list[randomId])
     const title = this.list[randomId][key]
     if (!this.previousId.includes(title)) {
       this.postId = title
       this.previousId.push(this.postId)
-      searchInput.value = this.postId
-      handleSearch(this.postId)
+      handleSearch(this.postId, false)
+
 
     }
     else {
@@ -266,8 +271,6 @@ const luckyGenerator = {
         this.previousId = []
       }
       this.go({ list, key })
-
-      console.log("retry!", this.previousId.length)
     }
   },
   getRandomId(max) {
@@ -279,5 +282,43 @@ const luckyGenerator = {
 
 
 button.addEventListener("click", () => luckyGenerator.go({ list: data, key: "title" }))
-
 button1.addEventListener("click", () => luckyGenerator.go({ list: categories, key: "key" }))
+
+
+const handleScrollTop = () => {
+  if (window.scrollY
+    > window.innerHeight / 5) {
+    window.scroll({
+      top: 0,
+      left: 0,
+      behavior: "smooth",
+    });
+  }
+}
+addEventListener("DOMContentLoaded", (event) => {
+
+
+  const observer = new IntersectionObserver(function (entries) {
+    entries.forEach((el) => {
+      const target = el.target
+      if (el.isIntersecting) {
+        target.classList.add("in-view")
+        target.classList.remove("not-in-view")
+      } else {
+        target.classList.remove("in-view")
+        target.classList.add("not-in-view")
+        // observer.unobserve(target);
+      }
+    })
+    // entries est un tableau contenant des IntersectionObserverEntry
+  }, {
+    threshold: 0.15 // permet d'indiquer la zone à partir de laquelle l'élément devient 'visible'
+  });
+
+  const items = document.querySelectorAll('.card')
+  for (const item of items) {
+    observer.observe(item)
+  }
+
+});
+

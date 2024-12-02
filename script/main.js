@@ -122,7 +122,6 @@ const formatDate = (date) => {
   const minutes = padStart(date.getMinutes())
 
   let currentDate = `${day}/${month}/${year} ${hours}H${minutes}`;
-  console.log(currentDate);
   return currentDate
 }
 
@@ -296,6 +295,11 @@ class LuckyGenerator {
       handleScrollTop();
     }
 
+    if (this.list.length === 0) {
+      window.alert("On a rien à proposer pour aujourd'hui.");
+      return
+    }
+
     const randomId = this.getRandomId(this.list.length);
     const title = this.list[randomId][this.key];
 
@@ -330,14 +334,10 @@ const selectedDate = data_event.filter(item => new Date(item.date_start).getTime
 
 const generatorLuckyToday = new LuckyGenerator({ list: selectedDate, key: "title", isScrollTop: true });
 
-
 button.addEventListener("click", () => generatorLuckyPost.go())
 button1.addEventListener("click", () => generatorLuckyCat.go())
 
-
-
-button2.addEventListener("click", el => {
-  el.preventDefault();
+button2.addEventListener("click", () => {
   generatorLuckyToday.go()
 })
 

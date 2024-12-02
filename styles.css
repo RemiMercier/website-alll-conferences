@@ -43,12 +43,11 @@ input {
   font-family: IBM;
 }
 :focus {
-border: initial;
+  border: initial;
 }
 :focus {
-	outline: none !important;
+  outline: none !important;
 }
-
 
 /* LAYOUT */
 main {
@@ -200,7 +199,6 @@ header {
     rgba(255, 255, 255, 1) 50%
   );
   transition: 0.5s;
-
 }
 
 .search-wrapper button:hover {
@@ -212,7 +210,6 @@ header {
     rgba(255, 255, 255, 1) 50%
   );
   transition: 0.5s;
-
 }
 
 .search-wrapper > div {
@@ -260,6 +257,11 @@ header {
   opacity: 1;
   content-visibility: visible;
   transition: ease-in 0.5s;
+}
+
+.disable {
+  /* display: none; */
+  background-color: red;
 }
 
 @media only screen and (max-width: 960px) {
